@@ -15,14 +15,14 @@ const PORT = process.env.PORT || 3001;
 const pdfRoutes = require('./routes/pdf');
 const conversionRoutes = require('./routes/conversion');
 const securityRoutes = require('./routes/security');
-const ocrRoutes = require('./routes/ocr');
+// const ocrRoutes = require('./routes/ocr'); // ❌ removed since OCR feature deleted
 const optimizationRoutes = require('./routes/optimization');
 
 // Middleware
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || ['http://localhost:5173', 'https://*.vercel.app'],
+  origin: process.env.FRONTEND_URL || ['http://localhost:5173', 'https://pdfwala.vercel.app'],
   credentials: true
 }));
 
@@ -39,8 +39,8 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
+// ✅ Use /tmp/uploads on Render, ./uploads locally
+const uploadsDir = process.env.UPLOAD_DIR || path.join(__dirname, 'uploads');
 fs.ensureDirSync(uploadsDir);
 
 // Configure multer for file uploads
@@ -93,7 +93,7 @@ app.get('/health', (req, res) => {
 app.use('/api/pdf', upload.array('files', 10), pdfRoutes);
 app.use('/api/conversion', upload.array('files', 10), conversionRoutes);
 app.use('/api/security', upload.single('file'), securityRoutes);
-app.use('/api/ocr', upload.single('file'), ocrRoutes);
+// app.use('/api/ocr', upload.single('file'), ocrRoutes); // ❌ removed
 app.use('/api/optimization', upload.single('file'), optimizationRoutes);
 
 // Error handling middleware
